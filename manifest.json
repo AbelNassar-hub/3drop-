@@ -1,0 +1,24 @@
+{
+  "name": "3DROP — T-shirts Personnalisés",
+  "short_name": "3DROP",
+  "description": "Commandez vos t-shirts personnalisés à Abidjan",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#D85A30",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/3drop_img/forme-de-lemurien.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/3drop_img/forme-de-lemurien.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

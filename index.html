@@ -8,6 +8,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="sweetalert2.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="3DROP">
+<link rel="apple-touch-icon" href="/3drop_img/forme-de-lemurien.png">
 <style>
 :root{--orange:#D85A30;--orange-light:#F0997B;--dark:#111111;--dark2:#1a1a1a;--dark3:#242424;--gray:#888;--white:#ffffff;--radius:10px;--green:#3DB887;}
 *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
@@ -805,6 +810,53 @@ setTimeout(() => {
     if (bar) bar.style.transform = 'translateY(0)';
   }
 }, 2000);
+</script>
+
+<!-- BANNIÈRE PWA iOS — à coller juste avant </body> dans index.html -->
+
+<!-- BANNIÈRE INSTALLATION iOS -->
+<div id="ios-install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:500;background:linear-gradient(135deg,#1a1a1a,#242424);border-top:2px solid rgba(216,90,48,0.5);padding:16px 20px;box-shadow:0 -8px 32px rgba(0,0,0,0.5);">
+  <div style="display:flex;align-items:flex-start;gap:12px;max-width:500px;margin:0 auto;">
+    <img src="/3drop_img/forme-de-lemurien.png" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;" onerror="this.style.display='none'">
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;">📲 Installer 3DROP sur iPhone</div>
+      <div style="font-size:13px;color:#aaa;line-height:1.5;">Pour activer les notifications, installez l'app :</div>
+      <div style="font-size:13px;color:#fff;margin-top:8px;line-height:1.8;">
+        1. Appuyez sur <span style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;">⎋ Partager</span> en bas de Safari<br>
+        2. Choisissez <span style="background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;">Sur l'écran d'accueil</span><br>
+        3. Ouvrez l'app installée et activez les notifs 🔔
+      </div>
+    </div>
+    <button onclick="document.getElementById('ios-install-banner').style.display='none';localStorage.setItem('ios-banner-dismissed','1')" style="background:none;border:none;color:#555;font-size:22px;cursor:pointer;flex-shrink:0;padding:0;line-height:1;">✕</button>
+  </div>
+</div>
+
+<script>
+// Détecter iPhone/iPad Safari (pas PWA)
+function isIosSafari() {
+  const ua = navigator.userAgent;
+  const isIos = /iphone|ipad|ipod/i.test(ua);
+  const isSafari = /safari/i.test(ua) && !/chrome|crios|fxios/i.test(ua);
+  const isPwa = window.navigator.standalone === true;
+  return isIos && isSafari && !isPwa;
+}
+
+// Afficher la bannière iOS si nécessaire
+window.addEventListener('load', () => {
+  if (isIosSafari() && !localStorage.getItem('ios-banner-dismissed')) {
+    setTimeout(() => {
+      document.getElementById('ios-install-banner').style.display = 'flex';
+    }, 3000);
+  }
+});
+
+// Sur iOS PWA — modifier le bouton notif pour demander permission directement
+if (window.navigator.standalone === true) {
+  window.addEventListener('load', () => {
+    // On est dans la PWA installée — tout fonctionne normalement
+    console.log('3DROP PWA installée sur iOS ✅');
+  });
+}
 </script>
 
 </body>

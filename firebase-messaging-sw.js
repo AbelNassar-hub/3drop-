@@ -5,9 +5,8 @@
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
-// ⚠️ Même config que firebase.js
 firebase.initializeApp({
-  apiKey: "YHf4sF1AkyJH-i5-eHERCjeQFuu0dKxPnVC9jVgKI-A",
+  apiKey: "AIzaSyBu_LNuKgghacuD_wEYpOCWKdcY-bOjzzU",
   authDomain: "drop-ddd07.firebaseapp.com",
   projectId: "drop-ddd07",
   storageBucket: "drop-ddd07.firebasestorage.app",
@@ -17,16 +16,13 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Notification reçue quand l'app est en ARRIÈRE-PLAN (téléphone verrouillé, etc.)
+// Notification en arrière-plan
 messaging.onBackgroundMessage((payload) => {
-  console.log('[SW] Notification reçue en arrière-plan :', payload);
-
-  const { title, body, icon, image } = payload.notification || {};
-
+  console.log('[SW] Notification arrière-plan :', payload);
+  const { title, body, icon } = payload.notification || {};
   self.registration.showNotification(title || '3DROP', {
     body: body || 'Vous avez un nouveau message.',
     icon: icon || '/3drop_img/forme-de-lemurien.png',
-    image: image || null,
     badge: '/3drop_img/forme-de-lemurien.png',
     vibrate: [200, 100, 200],
     data: payload.data || {},
@@ -37,12 +33,10 @@ messaging.onBackgroundMessage((payload) => {
   });
 });
 
-// Clic sur la notification → ouvrir le site
+// Clic sur notification → ouvrir le site
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-
   const url = event.notification.data?.url || 'https://www.3drop.store';
-
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
@@ -50,5 +44,31 @@ self.addEventListener('notificationclick', (event) => {
       }
       if (clients.openWindow) return clients.openWindow(url);
     })
+  );
+});
+
+// PWA — Cache des ressources essentielles
+const CACHE_NAME = '3drop-v1';
+const ASSETS = ['/', '/index.html', '/firebase.js', '/push-notifications.js', '/wbstyle.css'];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
