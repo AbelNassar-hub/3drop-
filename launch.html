@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DROP — T-shirts Personnalisés</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/3drop_img/forme-de-lemurien.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="launch-styles.css">
+    <link rel="stylesheet" href="wbstyle.css">
+</head>
+<body>
+    <div class="launch-container">
+        <!-- Animated Background -->
+        <div class="animated-bg"></div>
+        <div class="gradient-overlay"></div>
+
+        <!-- Main Content -->
+        <div class="launch-content">
+            <!-- Logo -->
+            <div class="launch-logo">
+                <span class="logo-3drop">3DROP</span>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <!-- Morphing Text Animation -->    
+                <h1 class="hero-title">vos T-shirts uniques</h1>
+
+                <p class="hero-subtitle">
+                    La plateforme #1 pour créer et commander des t-shirts personnalisés de qualité supérieure
+                </p>
+                <!-- CTA Section -->
+                <div class="cta-buttons">
+                    <button class="btn-primary" onclick="redirectToApp()">
+                        Commencer Maintenant
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <button class="btn-secondary" onclick="skipAnimation()">Passer</button>
+                </div>
+
+                <!-- Countdown Timer -->
+                <div class="countdown">
+                    <p>Redirection automatique dans <span id="timer">10</span>s</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="launch-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3DROP — Admin</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/3drop_img/forme-de-lemurien.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--orange:#D85A30;--orange-dim:rgba(216,90,48,0.12);--dark:#111;--dark2:#1a1a1a;--dark3:#222;--dark4:#2a2a2a;--border:rgba(255,255,255,0.07);--gray:#777;--white:#fff;--green:#3DB887;--green-dim:rgba(61,184,135,0.12);--red:#E05252;--red-dim:rgba(224,82,82,0.12);--blue:#7EB8F7;--blue-dim:rgba(126,184,247,0.12);--radius:10px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--white);min-height:100vh;}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;position:fixed;inset:0;z-index:1000;background:var(--dark);}
+.login-box{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:100%;max-width:380px;text-align:center;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;margin-bottom:8px;}
+.login-logo span{color:var(--orange);}
+.login-sub{font-size:13px;color:var(--gray);margin-bottom:32px;}
+.login-input{width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:12px 16px;color:var(--white);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px;transition:border-color .2s;}
+.login-input:focus{border-color:var(--orange);}
+.login-btn{width:100%;background:var(--orange);color:var(--white);border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;}
+.login-btn:hover{opacity:.85;}
+.login-error{font-size:12px;color:var(--red);margin-top:10px;display:none;}
+.login-hint{font-size:11px;color:rgba(255,255,255,0.15);margin-top:16px;}
+
+/* LAYOUT */
+#app{display:none;}
+.sidebar{width:220px;background:var(--dark2);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;}
+.sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;}
+.sidebar-logo .logo span{color:var(--orange);}
+.sidebar-logo .role{font-size:11px;color:var(--gray);margin-top:2px;}
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--gray);transition:all .2s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;}
+.nav-item:hover{background:var(--dark3);color:var(--white);}
+.nav-item.active{background:var(--orange-dim);color:var(--orange);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;min-width:18px;text-align:center;}
+.sidebar-footer{padding:16px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+.footer-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--gray);background:none;border:none;width:100%;font-family:'DM Sans',sans-serif;transition:all .2s;text-decoration:none;}
+.footer-btn:hover{color:var(--white);}
+
+/* MAIN */
+.main{margin-left:220px;padding:32px;min-height:100vh;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;}
+.page-meta{display:flex;flex-direction:column;gap:6px;}
+.page-tag{font-size:11px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:1px;}
+.page-sub{font-size:13px;color:var(--gray);margin-top:4px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.stat-card-num{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--orange);line-height:1;}
+.stat-card-label{font-size:12px;color:var(--gray);margin-top:4px;}
+.stat-card-delta{font-size:11px;color:var(--green);margin-top:2px;}
+
+/* TABLE */
+.table-card{background:var(--dark2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+.table-title{font-size:14px;font-weight:500;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{font-size:13px;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.empty-row td{text-align:center;color:var(--gray);padding:32px;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;white-space:nowrap;}
+.badge-green{background:var(--green-dim);color:var(--green);}
+.badge-orange{background:var(--orange-dim);color:var(--orange);}
+.badge-gray{background:rgba(255,255,255,0.06);color:var(--gray);}
+.badge-red{background:var(--red-dim);color:var(--red);}
+.badge-blue{background:var(--blue-dim);color:var(--blue);}
+
+/* BUTTONS */
+.add-btn{display:flex;align-items:center;gap:8px;background:var(--orange);color:var(--white);border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;white-space:nowrap;}
+.add-btn:hover{opacity:.85;}
+.btn-sm{font-size:11px;padding:5px 11px;border-radius:6px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:opacity .2s;white-space:nowrap;}
+.btn-sm:hover{opacity:.8;}
+.btn-edit{background:rgba(255,255,255,0.08);color:var(--white);}
+.btn-delete{background:var(--red-dim);color:var(--red);}
+.btn-approve{background:var(--green-dim);color:var(--green);}
+.btn-blue{background:var(--blue-dim);color:var(--blue);}
+.action-btns{display:flex;gap:5px;flex-wrap:wrap;}
+
+/* FORM CONTROL */
+.form-control{background:var(--dark3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--white);font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;}
+.form-control:focus{border-color:var(--orange);}
+.form-control option{background:var(--dark3);}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:12px;color:var(--gray);margin-bottom:6px;display:block;}
+.form-control-full{width:100%;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--dark2);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:18px;font-weight:500;margin-bottom:20px;}
+.modal-section{font-size:11px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin:16px 0 8px;}
+.modal-btns{display:flex;gap:10px;margin-top:20px;}
+.btn-primary{background:var(--orange);color:var(--white);border:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;}
+.btn-primary:hover{opacity:.85;}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+.btn-secondary{background:var(--dark3);color:var(--gray);border:1px solid var(--border);padding:11px 22px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* TOGGLE */
+.toggle{position:relative;width:36px;height:20px;cursor:pointer;display:inline-block;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,0.15);border-radius:99px;transition:.2s;}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:.2s;}
+.toggle input:checked+.toggle-slider{background:var(--orange);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(16px);}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;display:none;align-items:center;gap:10px;z-index:999;}
+.toast.show{display:flex;}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* SPINNER */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.2);border-top-color:var(--orange);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:768px){
+  .sidebar{width:100%;height:56px;flex-direction:row;border-right:none;border-bottom:1px solid var(--border);bottom:auto;}
+  .sidebar-logo,.sidebar-footer{display:none;}
+  .sidebar-nav{flex-direction:row;padding:8px;overflow-x:auto;}
+  .nav-item span:not(.nav-icon):not(.nav-badge){display:none;}
+  .main{margin-left:0;margin-top:56px;padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><span>3</span>DROP</div>
+    <div class="login-sub">Panneau d'administration</div>
+    <input type="text" class="login-input" placeholder="Identifiant" id="l-user" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" class="login-input" placeholder="Mot de passe" id="l-pass" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Se connecter</button>
+    <div class="login-error" id="l-error">Identifiant ou mot de passe incorrect.</div>
+    <div class="login-hint">Accès Interdit !</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo"><img src="/3drop_img/forme-de-lemurien.png" style="width: 32px; height: 32px; margin-right: 3px;" alt=""><span>3</span>DROP</div>
+      <div class="role">Administration</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span><span>Tableau de bord</span></button>
+      <button class="nav-item" onclick="showPage('commandes',this)"><span class="nav-icon">📦</span><span>Commandes</span><span class="nav-badge" id="badge-commandes">0</span></button>
+      <button class="nav-item" onclick="showPage('bat',this)"><span class="nav-icon">✅</span><span>BAT</span><span class="nav-badge" id="badge-bat">0</span></button>
+      <button class="nav-item" onclick="showPage('avis',this)"><span class="nav-icon">⭐</span><span>Avis clients</span><span class="nav-badge" id="badge-avis">0</span></button>
+      <button class="nav-item" onclick="showPage('notifications',this)"><span class="nav-icon">🔔</span><span>Notifications</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="index.html" class="footer-btn">🌐 Voir le site</a>
+      <button class="footer-btn" onclick="doLogout()" style="color:var(--red);">🚪 Deconnexion</button>
+    </div>
+  </div>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header"><div class="page-meta"><div class="page-tag">Vue d'ensemble</div><h1 class="page-title">TABLEAU DE BORD</h1><p class="page-sub">Bienvenue sur le panneau 3DROP.</p></div></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-card-num" id="dash-commandes">—</div><div class="stat-card-label">Commandes totales</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="dash-bat-attente">—</div><div class="stat-card-label">BAT en attente</div><div class="stat-card-delta" style="color:var(--orange);">A traiter</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="dash-avis-attente">—</div><div class="stat-card-label">Avis a valider</div></div>
+        <div class="stat-card"><div class="stat-card-num" id="dash-bat-valides">—</div><div class="stat-card-label">BAT valides</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-head"><span class="table-title">Dernieres commandes</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Client</th><th>Produit</th><th>Statut</th><th>BAT</th></tr></thead><tbody id="dash-table"><tr><td colspan="4" style="text-align:center;color:var(--gray);padding:24px;"><span class="spinner"></span></td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- COMMANDES -->
+    <div class="page" id="page-commandes">
+      <div class="page-header">
+        <div class="page-meta">
+          <div class="page-tag">Gestion</div>
+          <h1 class="page-title">COMMANDES</h1>
+          <p class="page-sub">Toutes les commandes recues depuis le site.</p>
+        </div>
+      </div>
+
+      <!-- Barre de recherche -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <input type="text" class="form-control" placeholder="🔍 Chercher par nom, téléphone ou code BAT..." id="search-commandes" style="flex:1;min-width:250px;" oninput="filterCommandes()">
+        <button class="add-btn" onclick="loadCommandes()">↻ Actualiser</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head"><span class="table-title">Commandes</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Tel</th>
+                <th>Produit</th>
+                <th>Qte</th>
+                <th>Statut</th>
+                <th>BAT</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="commandes-tbody">
+              <tr>
+                <td colspan="8" style="text-align:center;color:var(--gray);padding:24px;">
+                  <span class="spinner"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION BAT -->
+    <div class="page" id="page-bat">
+      <div class="page-header">
+        <div class="page-meta">
+          <div class="page-tag">Validation</div>
+          <h1 class="page-title">BON A TIRER</h1>
+          <p class="page-sub">Creez et gerez les maquettes. Le client valide en ligne avec son code.</p>
+        </div>
+        <button class="add-btn" onclick="openModal('modal-bat')">+ Creer un BAT</button>
+      </div>
+
+      <!-- Barre de recherche -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+        <input type="text" class="form-control" placeholder="🔍 Chercher par code BAT, client ou produit..." id="search-bat" style="flex:1;min-width:250px;" oninput="filterBAT()">
+        <button class="add-btn" style="background:var(--dark3);color:var(--gray);" onclick="loadBATs()">↻ Actualiser</button>
+      </div>
+
+      <div class="table-card">
+        <div class="table-head"><span class="table-title">Tous les BAT</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Maquette</th>
+                <th>Statut</th>
+                <th>Commentaire client</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bat-tbody">
+              <tr>
+                <td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">
+                  <span class="spinner"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVIS -->
+    <div class="page" id="page-avis">
+      <div class="page-header">
+        <div class="page-meta">
+          <div class="page-tag">Reputation</div>
+          <h1 class="page-title">AVIS CLIENTS</h1>
+          <p class="page-sub">Validez les avis avant publication sur le site.</p>
+        </div>
+        <button class="add-btn" style="background:var(--dark3);color:var(--gray);" onclick="loadAvis()">↻ Actualiser</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Note</th>
+                <th>Commentaire</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="avis-tbody">
+              <tr>
+                <td colspan="6" style="text-align:center;color:var(--gray);padding:24px;">
+                  <span class="spinner"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <!-- NOTIFICATIONS -->
+    <div class="page" id="page-notifications">
+      <div class="page-header">
+        <div class="page-meta">
+          <div class="page-tag">Communication</div>
+          <h1 class="page-title">NOTIFICATIONS PUSH</h1>
+          <p class="page-sub">Envoyez des messages directement sur le téléphone de vos clients.</p>
+        </div>
+      </div>
+
+      <!-- STATS ABONNES -->
+      <div class="stats-row" style="margin-bottom:24px;">
+        <div class="stat-card">
+          <div class="stat-card-num" id="notif-total">—</div>
+          <div class="stat-card-label">Abonnés aux notifications</div>
+          <div class="stat-card-delta">Clients inscrits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="notif-mobile">—</div>
+          <div class="stat-card-label">Sur mobile</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="notif-desktop">—</div>
+          <div class="stat-card-label">Sur ordinateur</div>
+        </div>
+      </div>
+
+      <!-- FORMULAIRE ENVOI -->
+      <div class="table-card" style="margin-bottom:20px;">
+        <div class="table-head"><span class="table-title">✍️ Composer une notification</span></div>
+        <div style="padding:24px;">
+
+          <!-- MESSAGES RAPIDES -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Messages rapides</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn-sm btn-edit" onclick="useTemplate('promo')">🔥 Promo weekend</button>
+              <button class="btn-sm btn-edit" onclick="useTemplate('nouveau')">🎨 Nouveau design</button>
+              <button class="btn-sm btn-edit" onclick="useTemplate('groupe')">💼 Commande groupée</button>
+              <button class="btn-sm btn-edit" onclick="useTemplate('avis')">❤️ Demande avis</button>
+              <button class="btn-sm btn-edit" onclick="useTemplate('relance')">👋 Relance client</button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Titre de la notification *</label>
+              <input type="text" class="form-control form-control-full" id="notif-titre" placeholder="Ex: 🔥 Offre weekend 3DROP" maxlength="50">
+              <div style="font-size:11px;color:var(--gray);margin-top:4px;"><span id="notif-titre-count">0</span>/50 caractères</div>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Lien de redirection (optionnel)</label>
+              <input type="text" class="form-control form-control-full" id="notif-url" placeholder="Ex: https://www.3drop.ci/#commande">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Message *</label>
+            <textarea class="form-control form-control-full" id="notif-message" rows="3" placeholder="Ex: Profitez de -10% ce weekend avec le code DROP10. Valable jusqu'à dimanche minuit !" maxlength="150" style="resize:vertical;"></textarea>
+            <div style="font-size:11px;color:var(--gray);margin-top:4px;"><span id="notif-msg-count">0</span>/150 caractères</div>
+          </div>
+
+          <!-- APERCU -->
+          <div style="background:var(--dark3);border-radius:10px;padding:16px;margin-bottom:20px;">
+            <div style="font-size:11px;color:var(--gray);margin-bottom:10px;letter-spacing:1px;">APERÇU SUR TÉLÉPHONE</div>
+            <div style="display:flex;align-items:flex-start;gap:12px;background:var(--dark4);border-radius:8px;padding:12px;">
+              <div style="width:36px;height:36px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🛕</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--white);" id="preview-titre">Titre de la notification</div>
+                <div style="font-size:12px;color:var(--gray);margin-top:3px;line-height:1.4;" id="preview-message">Votre message apparaîtra ici...</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">3DROP · maintenant</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <button class="add-btn" id="notif-send-btn" onclick="envoyerNotificationAdmin()">
+              🔔 Envoyer à tous les abonnés
+            </button>
+            <button class="btn-sm btn-edit" onclick="clearNotifForm()">Effacer</button>
+            <span id="notif-result" style="font-size:13px;color:var(--green);display:none;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIQUE TOKENS -->
+      <div class="table-card">
+        <div class="table-head">
+          <span class="table-title">📱 Abonnés enregistrés</span>
+          <button class="add-btn" style="background:var(--dark3);color:var(--gray);" onclick="loadTokens()">↻ Actualiser</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Plateforme</th>
+                <th>Date d'inscription</th>
+                <th>Page d'entrée</th>
+                <th>Token (début)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tokens-tbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--gray);padding:24px;">Cliquez sur Actualiser pour charger les abonnés.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL CODE BAT CREE -->
+<div class="modal-overlay" id="modal-bat-created" onclick="closeOut(event,'modal-bat-created')">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:40px;margin-bottom:12px;">✅</div>
+    <div class="modal-title" style="text-align:center;">BAT cree avec succes !</div>
+    <div style="background:var(--dark3);border-radius:10px;padding:20px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--gray);margin-bottom:6px;letter-spacing:1px;">CODE A ENVOYER AU CLIENT</div>
+      <div id="created-bat-code" style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--orange);letter-spacing:4px;"></div>
+    </div>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:16px;line-height:1.6;">Envoyez ce code au client par <b>WhatsApp</b>. Il pourra acceder a sa maquette sur le site et la valider.</p>
+    <div style="background:var(--dark3);border-radius:8px;padding:12px;font-size:12px;color:var(--gray);margin-bottom:20px;word-break:break-all;" id="created-bat-url"></div>
+    <div class="modal-btns" style="justify-content:center;">
+      <button class="btn-primary" onclick="copyBATLink()">📋 Copier le lien</button>
+      <button class="btn-secondary" onclick="closeModal('modal-bat-created')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMAGE EN GRAND -->
+<div class="modal-overlay" id="modal-image-viewer" onclick="closeOut(event,'modal-image-viewer')">
+  <div class="modal" style="max-width:600px;background:var(--dark2);border:1px solid var(--border);padding:0;">
+    <button onclick="closeModal('modal-image-viewer')" style="position:absolute;top:12px;right:12px;background:var(--dark2);border:1px solid var(--border);color:var(--white);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;z-index:10;">✕</button>
+    <img id="modal-image-src" style="width:100%;border-radius:10px 10px 0 0;max-height:70vh;object-fit:contain;">
+    <div style="padding:16px;text-align:center;border-top:1px solid var(--border);">
+      <a id="modal-image-link" href="#" target="_blank" style="font-size:12px;color:var(--blue);text-decoration:underline;">Ouvrir en grand</a>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CREER BAT -->
+<div class="modal-overlay" id="modal-bat" onclick="closeOut(event,'modal-bat')">
+  <div class="modal">
+    <div class="modal-title">Créer un nouveau BAT</div>
+    <div class="modal-section">Informations</div>
+    <div class="form-group">
+      <label class="form-label">Nom du client</label>
+      <input type="text" class="form-control" id="bat-client-input" placeholder="Ex: Konan David">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Produit</label>
+      <input type="text" class="form-control" id="bat-produit-input" placeholder="Ex: T-shirt Col rond Noir L">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quantité</label>
+      <input type="text" class="form-control" id="bat-qte-input" placeholder="Ex: 50 pieces">
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL de la maquette</label>
+      <input type="text" class="form-control" id="bat-maquette-input" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optionnel)</label>
+      <input type="text" class="form-control" id="bat-notes-input" placeholder="Ex: Augmenter le logo...">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" id="bat-create-btn" onclick="batCreateNew()">✨ Creer et generer le code</button>
+      <button class="btn-secondary" onclick="closeModal('modal-bat')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script src="firebase.js"></script>
+<script>
+const USERS = {admin: '3drop2026', manager: '3drop2026'};
+// Endpoint of your deployed notification HTTP function (leave empty to use WhatsApp click-to-chat)
+const NOTIF_ENDPOINT = ''; // e.g. https://us-central1-yourproj.cloudfunctions.net/sendAck
+let lastCreatedCode = '';
+let allCommandes = [];
+let allBATs = [];
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin() {
+  const u = document.getElementById('l-user').value.trim();
+  const p = document.getElementById('l-pass').value.trim();
+  if (USERS[u] && USERS[u] === p) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initDashboard();
+  } else {
+    document.getElementById('l-error').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('l-user').value = '';
+  document.getElementById('l-pass').value = '';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  
+  if (id === 'commandes') loadCommandes();
+  if (id === 'bat') loadBATs();
+  if (id === 'avis') loadAvis();
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeOut(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, color = 'var(--green)') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.querySelector('.toast-dot').style.background = color;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function initDashboard() {
+  const [commandes, bats, avis] = await Promise.all([fbGetAll('commandes'), fbGetAll('bats'), fbGetAll('avis')]);
+
+  document.getElementById('dash-commandes').textContent = commandes.length;
+  const batEnAttente = bats.filter(b => b.statut === 'envoye' || b.statut === 'en_attente').length;
+  const batValides = bats.filter(b => b.statut === 'valide').length;
+  const avisAttente = avis.filter(a => a.statut === 'en_attente').length;
+
+  document.getElementById('dash-bat-attente').textContent = batEnAttente;
+  document.getElementById('dash-bat-valides').textContent = batValides;
+  document.getElementById('dash-avis-attente').textContent = avisAttente;
+
+  document.getElementById('badge-commandes').textContent = commandes.filter(c => c.statut === 'recu').length;
+  document.getElementById('badge-bat').textContent = batEnAttente;
+  document.getElementById('badge-avis').textContent = avisAttente;
+
+  const tbody = document.getElementById('dash-table');
+  if (commandes.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Aucune commande.</td></tr>'; return; }
+  tbody.innerHTML = commandes.slice(-5).reverse().map(c => `
+    <tr>
+      <td><b>${c.nom || '—'}</b><br><span style="font-size:11px;color:var(--gray);">${c.tel || ''}</span></td>
+      <td>${c.type || ''} ${c.couleur || ''} ${c.taille || ''}</td>
+      <td>${statusBadge(c.statut || 'recu')}</td>
+      <td>${statusBadge(c.bat_statut || 'a_creer')}</td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// COMMANDES
+// ============================================================
+async function loadCommandes() {
+  const tbody = document.getElementById('commandes-tbody');
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px;"><span class="spinner"></span></td></tr>';
+  allCommandes = await fbGetAll('commandes');
+  if (allCommandes.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucune commande.</td></tr>'; return; }
+  displayCommandes(allCommandes);
+}
+
+function filterCommandes() {
+  const query = document.getElementById('search-commandes').value.toLowerCase().trim();
+  
+  if (!query) {
+    displayCommandes(allCommandes);
+    return;
+  }
+  
+  const filtered = allCommandes.filter(c => 
+    (c.nom || '').toLowerCase().includes(query) ||
+    (c.tel || '').toLowerCase().includes(query) ||
+    (c.id || '').toLowerCase().includes(query) ||
+    ((c.type || '') + ' ' + (c.couleur || '') + ' ' + (c.taille || '')).toLowerCase().includes(query)
+  );
+  
+  displayCommandes(filtered);
+}
+
+function displayCommandes(commandes) {
+  const tbody = document.getElementById('commandes-tbody');
+  
+  if (commandes.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Aucun resultat.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = commandes.reverse().map(c => `
+    <tr>
+      <td style="font-size:11px;color:var(--gray);">${formatDate(c.date)}</td>
+      <td><b>${c.nom || '—'}</b></td>
+      <td style="font-size:12px;">${c.tel || '—'}</td>
+      <td style="font-size:12px;">${c.type || ''} ${c.couleur || ''} ${c.taille || ''}</td>
+      <td>${c.quantite || '—'}</td>
+      <td>
+        <select class="form-control" style="font-size:11px;padding:4px 8px;" onchange="updateCommandeStatut('${c.id}',this.value)">
+          ${['recu','en_production','livre'].map(s => `<option value="${s}"${c.statut === s ? ' selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}
+        </select>
+      </td>
+      <td>${statusBadge(c.bat_statut || 'a_creer')}</td>
+      <td><div class="action-btns">
+        <button class="btn-sm btn-approve" onclick="creerBATDepuisCommande('${c.id}','${c.nom || ''}','${(c.type || '') + ' ' + (c.couleur || '') + ' ' + (c.taille || '')}','${c.quantite || ''}')">+ BAT</button>
+        <button class="btn-sm btn-blue" onclick="sendAck('${c.id}')">Accusé</button>
+        <button class="btn-sm btn-delete" onclick="deleteCommande('${c.id}')">Suppr.</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+async function updateCommandeStatut(id, statut) {
+  await fbUpdate('commandes', id, { statut });
+  showToast('Statut mis a jour !');
+}
+
+function creerBATDepuisCommande(commandeId, client, produit, qte) {
+  document.getElementById('bat-client-input').value = client;
+  document.getElementById('bat-produit-input').value = produit;
+  document.getElementById('bat-qte-input').value = qte + ' pieces';
+  openModal('modal-bat');
+}
+
+// ============================================================
+// BAT — CREATION
+// ============================================================
+async function batCreateNew() {
+  const client = document.getElementById('bat-client-input').value.trim();
+  const produit = document.getElementById('bat-produit-input').value.trim();
+  const qte = document.getElementById('bat-qte-input').value.trim();
+  const maquette = document.getElementById('bat-maquette-input').value.trim();
+  const notes = document.getElementById('bat-notes-input').value.trim();
+
+  if (!client || !produit || !maquette) {
+    alert('Remplissez: Nom client, Produit, Maquette');
+    return;
+  }
+
+  const btn = document.getElementById('bat-create-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Creation...';
+
+  try {
+    const code = generateBATCode();
+    
+    await fbSet('bats', code, {
+      client, produit, quantite: qte,
+      maquette_url: maquette,
+      notes,
+      statut: 'envoye',
+      date_creation: new Date().toISOString(),
+      commentaire_client: '',
+      nouvelle_maquette_url: '',
+      reponse_admin: '',
+      date_validation: ''
+    });
+
+    document.getElementById('bat-client-input').value = '';
+    document.getElementById('bat-produit-input').value = '';
+    document.getElementById('bat-qte-input').value = '';
+    document.getElementById('bat-maquette-input').value = '';
+    document.getElementById('bat-notes-input').value = '';
+
+    lastCreatedCode = code;
+    document.getElementById('created-bat-code').textContent = code;
+    document.getElementById('created-bat-url').textContent = `${window.location.origin}/index.html?bat=${code}`;
+    closeModal('modal-bat');
+    openModal('modal-bat-created');
+
+    showToast(`✅ BAT ${code} creé !`);
+    loadBATs();
+    initDashboard();
+  } catch (e) {
+    alert('Erreur: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Creer et generer le code';
+  }
+}
+
+// ============================================================
+// BAT — LISTE
+// ============================================================
+async function loadBATs() {
+  const tbody = document.getElementById('bat-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;"><span class="spinner"></span></td></tr>';
+  
+  allBATs = await fbGetAll('bats');
+  
+  if (allBATs.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aucun BAT cree. Cliquez sur "+ Creer un BAT".</td></tr>';
+    return;
+  }
+  
+  displayBATs(allBATs);
+}
+
+// ============================================================
+// BAT — FILTRAGE
+// ============================================================
+function filterBAT() {
+  const query = document.getElementById('search-bat').value.toLowerCase().trim();
+  
+  if (!query) {
+    displayBATs(allBATs);
+    return;
+  }
+  
+  const filtered = allBATs.filter(b =>
+    (b.id || '').toLowerCase().includes(query) ||
+    (b.client || '').toLowerCase().includes(query) ||
+    (b.produit || '').toLowerCase().includes(query)
+  );
+  
+  displayBATs(filtered);
+}
+
+// ============================================================
+// BAT — AFFICHER
+// ============================================================
+function displayBATs(bats) {
+  const tbody = document.getElementById('bat-tbody');
+  
+  if (bats.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Aucun resultat.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = bats.reverse().map(b => {
+    const maquetteCell = b.maquette_url 
+      ? `<a href="${b.maquette_url}" target="_blank" style="display:inline-block;"><img src="${b.maquette_url}" style="width:40px;height:40px;border-radius:4px;object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,0.1);" alt="maquette" onclick="openImageModal('${b.maquette_url}')"></a>`
+      : '<span style="font-size:11px;color:var(--gray);">Pas de maquette</span>';
+    
+    const commentaire = b.commentaire_client
+      ? `<span style="font-size:12px;color:var(--orange);">"${b.commentaire_client.substring(0, 50)}"...</span>`
+      : '<span style="color:var(--gray);font-size:12px;">—</span>';
+    
+    return `<tr>
+      <td>
+        <b style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--orange);">${b.id}</b>
+      </td>
+      <td>${b.client || '—'}</td>
+      <td style="font-size:12px;">${b.produit || '—'}<br><span style="color:var(--gray);">${b.quantite || ''}</span></td>
+      <td>${maquetteCell}</td>
+      <td>
+        <select class="form-control" style="font-size:11px;padding:4px 8px;" onchange="updateBATStatut('${b.id}',this.value)">
+          ${['en_attente','envoye','valide','modification'].map(s => `<option value="${s}"${b.statut === s ? ' selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}
+        </select>
+      </td>
+      <td>${commentaire}</td>
+      <td><div class="action-btns">
+        <button class="btn-sm btn-blue" onclick="copyCode('${b.id}')">📋 Code</button>
+        <button class="btn-sm btn-approve" onclick="copyClientLink('${b.id}')">📤 Envoyer</button>
+        <button class="btn-sm btn-delete" onclick="deleteBAT('${b.id}')">Suppr.</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+
+// # définir variables config (exemple)
+// firebase functions:config:set sendgrid.key="SENDGRID_KEY" twilio.sid="TWILIO_SID" twilio.token="TWILIO_TOKEN" twilio.number="+123456789" email.from="no-reply@domain.com" admin.emails="you@domain.com" functions.apikey="YOUR_SECRET"
+
+// # déployer les fonctions
+// cd ..
+// firebase deploy --only functions
+// ============================================================
+// BAT — ACTIONS
+// ============================================================
+async function updateBATStatut(id, statut) {
+  await fbUpdate('bats', id, { statut });
+  showToast('Statut mis a jour !');
+  loadBATs();
+  initDashboard();
+}
+
+async function deleteBAT(id) {
+  if (!confirm('Supprimer ce BAT ?')) return;
+  await fbDelete('bats', id);
+  showToast('BAT supprime', 'var(--red)');
+  loadBATs();
+  initDashboard();
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast('Code copie: ' + code));
+}
+
+function copyClientLink(code) {
+  const url = `${window.location.origin}/index.html?bat=${code}`;
+  const msg = `Bonjour ! Votre maquette 3DROP est prete.\n\nCode BAT: ${code}\nLien: ${url}\n\nValidez votre maquette avant qu'on lance la production.`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Message copie ! (WhatsApp)'));
+}
+
+function copyBATLink() {
+  const url = `${window.location.origin}/index.html?bat=${lastCreatedCode}`;
+  const msg = `Bonjour ! Votre maquette 3DROP est prete.\n\nCode BAT: ${lastCreatedCode}\nLien: ${url}`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Lien copie !'));
+}
+
+// ============================================================
+// AVIS
+// ============================================================
+async function loadAvis() {
+  const tbody = document.getElementById('avis-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:24px;"><span class="spinner"></span></td></tr>';
+  const avis = await fbGetAll('avis');
+  if (avis.length === 0) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Aucun avis.</td></tr>'; return; }
+  tbody.innerHTML = avis.reverse().map(a => {
+    const n = parseInt(a.note) || 5;
+    const etoiles = '★'.repeat(n) + '☆'.repeat(5 - n);
+    return `<tr>
+      <td><b>${a.nom || '—'}</b></td>
+      <td><span style="color:var(--orange);">${etoiles}</span> (${n}/5)</td>
+      <td style="max-width:220px;font-size:12px;color:var(--gray);">"${a.commentaire || '—'}"</td>
+      <td style="font-size:11px;color:var(--gray);">${formatDate(a.date)}</td>
+      <td>${statusBadge(a.statut || 'en_attente')}</td>
+      <td><div class="action-btns">
+        ${a.statut !== 'publie' ? `<button class="btn-sm btn-approve" onclick="publierAvis('${a.id}')">Publier</button>` : ''}
+        ${a.statut === 'publie' ? `<button class="btn-sm btn-edit" onclick="masquerAvis('${a.id}')">Masquer</button>` : ''}
+        <button class="btn-sm btn-delete" onclick="supprimerAvis('${a.id}')">Suppr.</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function publierAvis(id) {
+  await fbUpdate('avis', id, { statut: 'publie' });
+  showToast('Avis publie !');
+  loadAvis();
+  initDashboard();
+}
+
+async function masquerAvis(id) {
+  await fbUpdate('avis', id, { statut: 'en_attente' });
+  showToast('Avis masque');
+  loadAvis();
+}
+
+async function supprimerAvis(id) {
+  if (!confirm('Supprimer ?')) return;
+  await fbDelete('avis', id);
+  showToast('Avis supprime', 'var(--red)');
+  loadAvis();
+  initDashboard();
+}
+
+// ============================================================
+// NOTIFICATIONS PUSH — ADMIN
+// ============================================================
+
+// Comptage caractères en temps réel + aperçu
+document.addEventListener('DOMContentLoaded', () => {
+  const titreInput = document.getElementById('notif-titre');
+  const msgInput   = document.getElementById('notif-message');
+  if (titreInput) {
+    titreInput.addEventListener('input', () => {
+      document.getElementById('notif-titre-count').textContent = titreInput.value.length;
+      document.getElementById('preview-titre').textContent = titreInput.value || 'Titre de la notification';
+    });
+  }
+  if (msgInput) {
+    msgInput.addEventListener('input', () => {
+      document.getElementById('notif-msg-count').textContent = msgInput.value.length;
+      document.getElementById('preview-message').textContent = msgInput.value || 'Votre message apparaîtra ici...';
+    });
+  }
+});
+
+// Charger les stats abonnés
+async function loadNotifStats() {
+  const tokens = await fbGetAll('push_tokens');
+  document.getElementById('notif-total').textContent   = tokens.length;
+  document.getElementById('notif-mobile').textContent  = tokens.filter(t => t.platform === 'mobile').length;
+  document.getElementById('notif-desktop').textContent = tokens.filter(t => t.platform === 'desktop').length;
+}
+
+// Charger la liste des tokens
+async function loadTokens() {
+  const tbody = document.getElementById('tokens-tbody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--gray);padding:24px;"><span class="spinner"></span></td></tr>';
+  const tokens = await fbGetAll('push_tokens');
+  if (tokens.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Aucun abonné pour le moment. Activez les notifications sur votre site !</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tokens.reverse().map(t => `
+    <tr>
+      <td><span class="badge ${t.platform === 'mobile' ? 'badge-blue' : 'badge-gray'}">${t.platform === 'mobile' ? '📱 Mobile' : '💻 Ordinateur'}</span></td>
+      <td style="font-size:12px;color:var(--gray);">${formatDate(t.createdAt)}</td>
+      <td style="font-size:11px;color:var(--gray);">${t.page || '/'}</td>
+      <td style="font-size:11px;color:var(--gray);font-family:monospace;">${(t.token || '').substring(0, 20)}...</td>
+      <td><button class="btn-sm btn-delete" onclick="deleteToken('${t.id}')">Suppr.</button></td>
+    </tr>
+  `).join('');
+}
+
+async function deleteToken(id) {
+  if (!confirm('Retirer cet abonné ?')) return;
+  await fbDelete('push_tokens', id);
+  showToast('Abonné retiré', 'var(--red)');
+  loadTokens();
+  loadNotifStats();
+}
+
+// Templates de messages rapides
+const TEMPLATES = {
+  promo:   { titre: '🔥 Offre weekend 3DROP !',        message: 'Profitez de -10% ce weekend avec le code DROP10. Valable jusqu\'à dimanche minuit !', url: 'https://www.3drop.store/#commande' },
+  nouveau: { titre: '🎨 Nouveau design disponible !',   message: 'On vient d\'ajouter de nouveaux coloris et styles. Venez personnaliser votre t-shirt avant rupture de stock.', url: 'https://www.3drop.store' },
+  groupe:  { titre: '💼 Commandes groupées : -20%',     message: 'Vous avez une équipe ou un événement ? 3DROP vous offre des tarifs spéciaux dès 10 t-shirts. Demandez un devis gratuit.', url: 'https://www.3drop.store/#contact' },
+  avis:    { titre: '❤️ Votre avis compte pour nous',   message: 'Vous avez reçu votre t-shirt 3DROP ? Laissez-nous un avis en 30 secondes. Ça nous aide énormément !', url: 'https://www.3drop.store/#avis' },
+  relance: { titre: '👋 On vous a pas vu depuis un moment !', message: 'Revenez sur 3DROP — on a de nouveaux designs et une surprise pour vous. Votre prochain t-shirt n\'attend que votre idée.', url: 'https://www.3drop.store' },
+};
+
+function useTemplate(key) {
+  const tpl = TEMPLATES[key];
+  if (!tpl) return;
+  document.getElementById('notif-titre').value   = tpl.titre;
+  document.getElementById('notif-message').value = tpl.message;
+  document.getElementById('notif-url').value     = tpl.url || '';
+  document.getElementById('notif-titre-count').textContent = tpl.titre.length;
+  document.getElementById('notif-msg-count').textContent   = tpl.message.length;
+  document.getElementById('preview-titre').textContent   = tpl.titre;
+  document.getElementById('preview-message').textContent = tpl.message;
+}
+
+function clearNotifForm() {
+  ['notif-titre','notif-message','notif-url'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('notif-titre-count').textContent   = '0';
+  document.getElementById('notif-msg-count').textContent     = '0';
+  document.getElementById('preview-titre').textContent       = 'Titre de la notification';
+  document.getElementById('preview-message').textContent     = 'Votre message apparaîtra ici...';
+  document.getElementById('notif-result').style.display      = 'none';
+}
+
+// Envoi réel via Firebase Cloud Messaging (API HTTP v1)
+// ⚠️ L'envoi direct depuis le navigateur nécessite un serveur backend ou Firebase Cloud Functions
+// Pour l'instant : ouvre Firebase Console avec le message pré-rempli + copie dans le presse-papier
+async function envoyerNotificationAdmin() {
+  const titre   = document.getElementById('notif-titre').value.trim();
+  const message = document.getElementById('notif-message').value.trim();
+  const url     = document.getElementById('notif-url').value.trim();
+
+  if (!titre || !message) { showToast('Remplissez le titre et le message !', 'var(--red)'); return; }
+
+  const btn = document.getElementById('notif-send-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Envoi...';
+
+  try {
+    // Sauvegarder dans Firestore (historique des envois)
+    await fbAdd('notifications_envoyees', {
+      titre, message, url,
+      date: new Date().toISOString(),
+      statut: 'envoye_console'
+    });
+
+    // Ouvrir Firebase Console Messaging pour envoyer
+    const consoleUrl = `https://console.firebase.google.com/project/drop-ddd07/messaging`;
+    window.open(consoleUrl, '_blank');
+
+    // Copier les infos dans le presse-papier
+    const texte = `TITRE: ${titre}\nMESSAGE: ${message}${url ? '\nURL: ' + url : ''}`;
+    await navigator.clipboard.writeText(texte);
+
+    const result = document.getElementById('notif-result');
+    result.style.display = 'inline';
+    result.textContent = '✅ Infos copiées ! Collez-les dans Firebase Console (onglet qui vient de s\'ouvrir).';
+
+    showToast('Firebase Console ouvert !');
+    clearNotifForm();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'var(--red)');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔔 Envoyer à tous les abonnés';
+  }
+}
+
+// Charger les stats quand on ouvre la page notifications
+const _origShowPage = showPage;
+// Override showPage pour charger les stats notif
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'commandes') loadCommandes();
+  if (id === 'bat') loadBATs();
+  if (id === 'avis') loadAvis();
+  if (id === 'notifications') { loadNotifStats(); loadTokens(); }
+}
+
+function statusBadge(statut) {
+  const map = {
+    'en_attente': ['badge-orange', 'En attente'],
+    'envoye': ['badge-blue', 'Envoyé'],
+    'valide': ['badge-green', 'Validé ✓'],
+    'modification': ['badge-red', 'Modif.'],
+    'en_production': ['badge-gray', 'Production'],
+    'livre': ['badge-green', 'Livré'],
+    'publie': ['badge-green', 'Publié'],
+    'recu': ['badge-blue', 'Reçu'],
+    'a_creer': ['badge-gray', 'A créer']
+  };
+  const [cls, label] = map[statut] || ['badge-gray', statut];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function openImageModal(imageUrl) {
+  document.getElementById('modal-image-src').src = imageUrl;
+  document.getElementById('modal-image-link').href = imageUrl;
+  openModal('modal-image-viewer');
+}
+
+async function deleteCommande(id) {
+  if (!confirm('Supprimer cette commande ?')) return;
+  await fbDelete('commandes', id);
+  showToast('Commande supprimee', 'var(--red)');
+  loadCommandes();
+  initDashboard();
+}
+
+async function sendAck(id) {
+  const cmd = allCommandes.find(c => c.id === id) || await fbGet('commandes', id);
+  if (!cmd) { showToast('Commande introuvable', 'var(--red)'); return; }
+  const nom = cmd.nom || '';
+  const telRaw = (cmd.tel || '').trim();
+  const tel = telRaw.replace(/[^+0-9]/g, '');
+  const date = formatDate(cmd.date || new Date().toISOString());
+  const message = `Hii ${nom},\n\nNous avons bien reçu votre commande le ${date}.\nNous reviendrons vers vous sous peu.\n\nMerci, 3DROP`;
+
+  // If no server endpoint configured, open WhatsApp click-to-chat and copy message
+  if (!NOTIF_ENDPOINT) {
+    if (!tel) { navigator.clipboard.writeText(message); showToast('Numero absent — message copié', 'var(--orange)'); return; }
+    const telForWA = tel.startsWith('+') ? tel.replace('+','') : tel;
+    const waUrl = `https://wa.me/${telForWA}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+    navigator.clipboard.writeText(message);
+    showToast('WhatsApp ouvert et message copié');
+    return;
+  }
+
+  try {
+    const res = await fetch(NOTIF_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': 'REPLACE_WITH_KEY' },
+      body: JSON.stringify({ phone: tel, name: nom, date: cmd.date || new Date().toISOString(), message, commandeId: id })
+    });
+    if (res.ok) showToast('Accusé envoyé');
+    else {
+      const txt = await res.text().catch(()=>null);
+      console.error('sendAck error', res.status, txt);
+      showToast('Erreur envoi', 'var(--red)');
+    }
+  } catch (e) {
+    console.error('sendAck exception', e);
+    showToast('Erreur envoi', 'var(--red)');
+  }
+}
+</script>
+</body>
+</html>
