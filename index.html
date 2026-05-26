@@ -168,7 +168,6 @@ footer{background:var(--dark);border-top:1px solid rgba(255,255,255,0.06);paddin
     <button id="btn-notif-nav" onclick="activerNotifications()" title="Activer les notifications" style="background:rgba(216,90,48,0.12);color:var(--orange);border:1px solid rgba(216,90,48,0.3);padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap;">🔔 Notifs</button>
     <a href="#order" class="nav-cta">Commander</a>
   </div>
-  <!-- <button class="nav-menu" onclick="toggleMenu()"><span></span><span></span><span></span></button> -->
 </nav>
 
 <section class="hero">
@@ -676,57 +675,6 @@ async function loadReviews(){
     console.error('Erreur loadReviews:', e);
   }
 }
-
-// NOTIFICATIONS — synchronise tous les boutons
-async function activerNotifications() {
-  const btns = ['btn-notif-nav','btn-notif-hero','btn-notif-sticky'];
-  btns.forEach(id => {
-    const b = document.getElementById(id);
-    if (b) { b.textContent = '⏳ Activation...'; b.disabled = true; }
-  });
-
-  const token = await subscribeToPush();
-
-  if (token) {
-    btns.forEach(id => {
-      const b = document.getElementById(id);
-      if (b) {
-        b.textContent = '✅ Notifications activées';
-        b.style.background = 'rgba(61,184,135,0.15)';
-        b.style.borderColor = 'rgba(61,184,135,0.4)';
-        b.style.color = '#3DB887';
-      }
-    });
-    // Cacher le toast si visible
-    const toast = document.getElementById('notif-toast');
-    if (toast) toast.style.display = 'none';
-    // Cacher le sticky
-    const sticky = document.getElementById('notif-sticky');
-    if (sticky) sticky.style.display = 'none';
-  } else {
-    btns.forEach(id => {
-      const b = document.getElementById(id);
-      if (b) { b.disabled = false; }
-    });
-    // Restaurer textes
-    const nb = document.getElementById('btn-notif-nav');
-    if (nb) nb.textContent = '🔔 Notifs';
-    const hb = document.getElementById('btn-notif-hero');
-    if (hb) hb.textContent = '🔔 Recevoir nos offres & nouveautés';
-    const sb = document.getElementById('btn-notif-sticky');
-    if (sb) sb.textContent = '🔔 Activer les notifications';
-  }
-}
-
-// TOAST après 4 secondes
-window.addEventListener('load', () => {
-  if (Notification.permission === 'default') {
-    setTimeout(() => {
-      const toast = document.getElementById('notif-toast');
-      if (toast) toast.style.display = 'flex';
-    }, 4000);
-  }
-});
 
 function showLoading(){
   document.getElementById('loading-msg').style.display = 'block';
